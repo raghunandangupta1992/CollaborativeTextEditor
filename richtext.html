@@ -1,0 +1,479 @@
+<!doctype html>
+<!-- See http://www.firepad.io/docs/ for detailed embedding docs. -->
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <!-- Include Firebase -->
+	<script src='firebase.js'></script>
+	<script src='jquery.min.js'></script>
+	<script type='text/javascript' src='firebase-simple-login.js'></script>
+
+  <!-- Include CodeMirror -->
+  <script src="codemirror/lib/codemirror.js"></script>
+  <link rel="stylesheet" href="codemirror/lib/codemirror.css" />
+
+  <!-- Include Firepad -->
+  <script src="firepad.js"></script>
+  <link rel="stylesheet" href="firepad.css" />
+
+  <!-- Helper for generating URLs / Firebase references for example purposes.
+       Not necessary in production apps. 
+  <script src="example-helper.js"></script>
+-->
+
+  <style>
+    html { height: 100%; }
+    body { margin: 0; height: 50%; position: relative; }
+      /* Height / width / positioning can be customized for your use case.
+         For demo purposes, we make firepad fill the entire browser. */
+    .firepad {
+      position: absolute; left: 0; top: 0; bottom: 0; right: 300px; height: auto;
+	  min-height : 400px; width: 700px;
+    }
+	#req{ position:absolute; top:20px; right:50px; 	}
+	
+  </style>
+</head>
+
+<body>
+  <div id="firepad"></div>
+  <div id="req"></div>
+  
+   <script>
+  
+ var friendSID;
+ var friendEmail;
+ var shNodeName;
+ 
+ var du = null;
+ var defaultRef = new Firebase('https://rgfirepad.firebaseIO.com');
+ 
+ var firepad;
+ 
+ function runFirepad(loginUserId)
+ {
+						var firepadRef = new Firebase('https://rgfirepad.firebaseio.com/' + loginUserId);
+
+						//// Create CodeMirror (with lineWrapping on).
+						var codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true });
+
+						//// Create Firepad (with rich text toolbar and shortcuts enabled).
+						firepad = Firepad.fromCodeMirror(firepadRef, codeMirror,
+							{ richTextToolbar: true, richTextShortcuts: true });
+
+						//// Initialize contents.
+						firepad.on('ready', function() {
+						  if (firepad.isHistoryEmpty()) {
+							firepad.setHtml(
+								'<span style="font-size: 24px;">Rich-text editing with <span style="color: red">Firepad!</span></span><br/>\n' +
+								'<br/>' +
+								'<div style="font-size: 18px">' +
+								'Supports:<br/>' +
+								'<ul>' +
+								  '<li>Different ' +
+									'<span style="font-family: impact">fonts,</span>' +
+									'<span style="font-size: 24px;"> sizes, </span>' +
+									'<span style="color: blue">and colors.</span>' +
+								  '</li>' +
+								  '<li>' +
+									'<b>Bold, </b>' +
+									'<i>italic, </i>' +
+									'<u>and underline.</u>' +
+								  '</li>' +
+								  '<li>Lists' +
+									'<ol>' +
+									  '<li>One</li>' +
+									  '<li>Two</li>' +
+									'</ol>' +
+								  '</li>' +
+								  '<li>Undo / redo</li>' +
+								  '<li>Cursor / selection synchronization.</li>' +
+								  '<li>And it\'s all fully collaborative!</li>' +
+								'</ul>' +
+								'</div>');
+						  }
+						});
+ 
+ 
+ }
+ 
+ 
+ 
+$(document).ready(function(){
+    $('#noteId, #noteName, #noteData').val('');
+	
+	$( "#makeNote" ).click(function()
+	{
+		console.log('in MakeNote');
+		
+		var noteName = $('#noteName').val();
+		var noteData = $('#noteData').val();
+		var noteId = $('#noteId').val();
+		
+		// if this node is a shared(friend's node)
+		if(noteId.indexOf('friend') != -1)
+		{
+				noteId = noteId.substring(noteId.indexOf('friend')+6,noteId.length);
+			//alert(friendSID)
+				
+				//var dum = defaultRef.child(friend).
+				
+				var newNode = defaultRef.child(friendSID);
+		
+                if (noteId) {
+					// search for noteID [exists or not] and Update 
+					
+                    newNode.child(noteId).update({name : noteName, message : noteData});
+                }
+				else
+				{
+					alert("::"+noteId+"::");
+				}
+		
+		}
+		
+		else
+		{
+		
+		var newNode = defaultRef.child(du.id);
+		
+		/*if(newNode.hasChild(noteId))
+		{	alert(1)	}*/
+		
+                if (noteId) {
+					// search for noteID [exists or not] and Update 
+                    newNode.child(noteId).update({name : noteName, message : noteData});
+                }
+                else {
+					// else make a new one
+                    newNode.push({name : noteName, message : noteData});
+					$('#noteId, #noteName, #noteData').val('');
+                    }
+		}
+		
+	});
+	
+ });
+ 
+ 
+ function friendSnap(fid,femail,shNodeName)
+ {
+	//alert(fid);
+			//alert(shNodeName);
+		//var x = shNodeName;
+		//alert(x);
+		var myDataRef = new Firebase('https://rgnew.firebaseio.com/usr/' + fid );
+	 
+		function onSnapshot (snapshot)
+		{
+			console.log("running LOG-> @ friend");
+			
+			var id = snapshot.name();		// id -> Name of the NODE 
+			//alert(id)
+			//if(id != 'friend' && id != 'shared' )
+			
+			// to print only Shared Nodes !!
+			//if(id == shNodeName )	
+			//{
+				var message = snapshot.val();	// The Message !!
+				displayFriendChatMessage(id, message.name, message.message,femail);
+			//}
+			
+		}
+		myDataRef.on('child_added', onSnapshot);
+		myDataRef.on('child_changed', onSnapshot);
+	}	
+  
+ 
+ function passing(user)
+ {
+	du = user;
+	console.log("in DU: " + du);
+
+	if(du != null)
+	{
+		var myDataRef = new Firebase('https://rgfirepad.firebaseio.com/' + du.id + '/' + 'friend' );
+	 
+		function onSnapshot (snapshot)
+		{
+			console.log("running LOG-> @ parent");
+			
+			var id = snapshot.name();		// id -> Name of the NODE 
+			
+		$('<p/>').addClass('request').attr('id', id).text(id).appendTo($('#req'));
+			
+			
+		}
+		myDataRef.on('child_added', onSnapshot);
+		myDataRef.on('child_changed', onSnapshot);
+	}	
+	//alert(du);
+}
+  
+//---------------------------------------- Authentication Starts ----------------------------------//
+
+ var chatRef = new Firebase('https://rgfirepad.firebaseIO.com');
+
+	auth = new FirebaseSimpleLogin(chatRef, function(error, user) 
+	{
+		 
+			console.log('in main');
+			
+		  if (error) {
+			// an error occurred while attempting login
+			console.log(error);
+			passing(null);
+			
+		  } else if (user) {
+			// user authenticated with Firebase
+			passing(user);
+			console.log('User ID: ' + user.id + ', Provider: ' + user.provider + ', email: ' + user.email);
+			
+			runFirepad(user.id);
+			
+			
+						/*var firepadRef = new Firebase('https://rgfirepad.firebaseio.com/' + user.id);
+
+						//// Create CodeMirror (with lineWrapping on).
+						var codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true });
+
+						//// Create Firepad (with rich text toolbar and shortcuts enabled).
+						var firepad = Firepad.fromCodeMirror(firepadRef, codeMirror,
+							{ richTextToolbar: true, richTextShortcuts: true });
+
+						//// Initialize contents.
+						firepad.on('ready', function() {
+						  if (firepad.isHistoryEmpty()) {
+							firepad.setHtml(
+								'<span style="font-size: 24px;">Rich-text editing with <span style="color: red">Firepad!</span></span><br/>\n' +
+								'<br/>' +
+								'<div style="font-size: 18px">' +
+								'Supports:<br/>' +
+								'<ul>' +
+								  '<li>Different ' +
+									'<span style="font-family: impact">fonts,</span>' +
+									'<span style="font-size: 24px;"> sizes, </span>' +
+									'<span style="color: blue">and colors.</span>' +
+								  '</li>' +
+								  '<li>' +
+									'<b>Bold, </b>' +
+									'<i>italic, </i>' +
+									'<u>and underline.</u>' +
+								  '</li>' +
+								  '<li>Lists' +
+									'<ol>' +
+									  '<li>One</li>' +
+									  '<li>Two</li>' +
+									'</ol>' +
+								  '</li>' +
+								  '<li>Undo / redo</li>' +
+								  '<li>Cursor / selection synchronization.</li>' +
+								  '<li>And it\'s all fully collaborative!</li>' +
+								'</ul>' +
+								'</div>');
+						  }
+						});*/
+			
+			
+			
+			
+			
+			
+			
+			//makeDirectory();
+
+			} else {
+			console.log('None Logged In');
+			//passing(null);
+		  }
+	});
+	
+	$(document).ready(function(){
+
+		$( "#create" ).click(function()
+				  {
+					var email = $('#emailid').val();
+					var pass = $('#password').val();
+					auth.createUser(email,pass, function(error, user)
+					{
+					  if (!error) {
+						console.log('User Id: ' + user.id + ', Email: ' + user.email);
+						alert("User Created");
+					  }
+					  else{
+						console.log('error: ' + error);
+					  }
+					 });
+				  });
+
+		$( "#logOut" ).click(function()
+			 {
+				//console.log('LoggedOut now : '+ user.email);
+				console.log("in LOGout");
+				$('#messagesDiv').empty();
+				auth.logout();
+			 });
+		
+		$( "#logIn" ).click(function()
+		{
+			var a = $('#email1').val();
+			var b = $('#pass1').val();
+			
+			console.log('in logIn');
+			auth.login('password', {
+			  email: a,
+			  password: b
+			});
+			
+			//console.log('Logged IN : '+ user.email);	
+				// Uncaught TypeError: Cannot read property 'email' of null 
+			
+			// have to place 'console.log' after login action -> else NO user is active
+		});	 
+				  
+	});	
+	
+function sharing()
+{
+
+		var friendID = $('#shId').val();
+		//var shareNode = $('#shNodeId').val();
+		
+			// making Friend node in FRIEND's zone
+		//var shNode = defaultRef.child(du.id).child('share').child(friendID);
+		
+		var frNode = defaultRef.child(friendID).child('friend').child(du.id);
+		
+			// making Friend node in MY zone
+			// var myShNode = defaultRef.child(du.id).child('shared').child(friendID);
+		
+		//shNode.push({name : du.id});	// nodeName and Email passed to Friend.
+		
+		frNode.push({name : du.id });
+		
+}
+  
+
+	$('body').on('click', '.request', function(e)
+	{	 	
+		//alert(this.id);
+		firepad.setText('');
+		runFirepad(this.id);
+		
+	});  
+  
+//---------------------------------------- Authentication ENDs ----------------------------------//
+  
+
+  
+  
+			// ------------------------ DATA PRINTING Start -----------------------------------
+
+ //var myDataRef = new Firebase('https://rgnew.firebaseio.com/usr/' + du.id );
+ 
+ 
+		// to display in HTML !!
+function displayFriendChatMessage(id, name, text, fid)
+{
+	id = 'friend' + id;
+	
+    var $div = $('#' + id);
+
+	// if Message Do-Not Exist !! 
+	if (!$div.length)
+	{ 
+		$div = $('<div/>', {id: id}).appendTo($('#messagesDiv'));
+	}
+    
+	// if exist !!	 -> to make inner elements (<a> , <em> )
+
+	$div.empty().append(
+	
+			// append <a>
+    
+		$('<a/>', {href: '#'+id}).text(text).click(function(){
+		
+			// OnClick -> <a> Tag !! -> fill the <input> with these values 
+    
+			$('#noteName').val(name);
+            $('#noteData').val(text);
+            $('#noteId').val(id);
+        
+		})
+        ).prepend($('<em/>').text(name+': ')).prepend($('<b/>').text('shared via : '+ fid +' : '));
+	$('#messagesDiv')[0].scrollTop = $('#messagesDiv')[0].scrollHeight;
+	
+}
+
+
+function displayChatMessage(id, name, text)
+{
+    var $div = $('#' + id);
+
+	// if Message Do-Not Exist !! 
+	if (!$div.length)
+	{ 
+		$div = $('<div/>', {id: id}).appendTo($('#messagesDiv'));
+	}
+    
+	// if exist !!	 -> to make inner elements (<a> , <em> )
+
+	$div.empty().append(
+	
+			// append <a>
+    
+		$('<a/>', {href: '#'+id}).text(text).click(function(){
+		
+			// OnClick -> <a> Tag !! -> fill the <input> with these values 
+    
+			$('#noteName').val(name);
+            $('#noteData').val(text);
+            $('#noteId').val(id);
+            $('#shNodeId').val(id);	// at sharing
+        
+		})
+        ).prepend($('<em/>').text(name+': '));
+	$('#messagesDiv')[0].scrollTop = $('#messagesDiv')[0].scrollHeight;
+	
+}
+
+
+// ------------------------ DATA PRINTING END -----------------------------------
+
+  
+
+  
+  </script>
+  
+  <div style="position:absolute;padding:5px; top:100px; right:100px; height:300px; border:solid black;">
+			
+			
+		<label>For New Users</label><br>
+		
+		<input type="email" id="emailid"	placeholder="abc@pqr.com" />
+		<input type="password" id="password" placeholder="password" />
+		<input type="button" id="create" value="create"	/>
+		<br><br>
+
+		<label>Login Users</label><br>	
+
+		
+		<input type="email" id="email1" 	placeholder="abc@pqr.com" />
+		<input type="password" id="pass1"	placeholder="password" />
+		<input type="button" value="login" id="logIn"	/>
+		<br>		<br>
+		<label>Share</label><br>
+		
+		<input type="text" id="shId"	/>
+		<input type="text" readonly id="shNodeId"	/>
+		<input type="button" value="share" id="shBt" onclick="sharing()"	/>
+		
+		<center>		<br>
+		<input type="button" id="logOut" value="logout" style="width:75px; height:75px;font-size:20px;"	/>
+		</center>
+		
+		
+	</div>
+</body>
+</html>
