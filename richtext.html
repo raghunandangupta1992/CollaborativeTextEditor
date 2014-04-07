@@ -33,6 +33,7 @@
     }
 	#req{ position:absolute; top:20px; right:250px; 	}
 	.request{background-color:lightblue; cursor:pointer; float:left; padding:10px; font-size:20px; border: 1px solid black; } 
+	.spcrequest{background-color:lightblue; cursor:pointer; float:left; padding:10px; font-size:20px; border: 1px solid black; } 
 	
   </style>
 </head>
@@ -41,6 +42,7 @@
   <div id="firepad"></div>
   <div id="req">
 	<p>Shared Document</p>
+	<p class="spcrequest" onclick="dumy()" >MY</p>
   </div>
   
    <script>
@@ -356,12 +358,33 @@ function sharing()
 		frNode.push({name : du.id });
 		
 }
+  function dumy()
+  {
+		$('#firepad').remove();
+		
+		var nDiv = document.createElement('div');
+		nDiv.id = "firepad";
+		
+		document.body.appendChild(nDiv);
+		
+		runFirepad(du.id);
   
+  }
 
 	$('body').on('click', '.request', function(e)
 	{	 	
 		//alert(this.id);
-		firepad.setText('');
+//		firepad.setText('');
+		
+		//document.getElementById('firepad').remove();
+		
+		$('#firepad').remove();
+		
+		var nDiv = document.createElement('div');
+		nDiv.id = "firepad";
+		
+		document.body.appendChild(nDiv);
+		
 		runFirepad(this.id);
 		
 	});  
