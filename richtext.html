@@ -31,14 +31,17 @@
       position: absolute; left: 0; top: 0; bottom: 0; right: 300px; height: auto;
 	  min-height : 400px; width: 700px;
     }
-	#req{ position:absolute; top:20px; right:50px; 	}
+	#req{ position:absolute; top:20px; right:250px; 	}
+	.request{background-color:lightblue; cursor:pointer; float:left; padding:10px; font-size:20px; border: 1px solid black; } 
 	
   </style>
 </head>
 
 <body>
   <div id="firepad"></div>
-  <div id="req"></div>
+  <div id="req">
+	<p>Shared Document</p>
+  </div>
   
    <script>
   
@@ -446,7 +449,7 @@ function displayChatMessage(id, name, text)
   
   </script>
   
-  <div style="position:absolute;padding:5px; top:100px; right:100px; height:300px; border:solid black;">
+  <div style="position:absolute;padding:5px; top:150px; right:100px; height:300px; border:solid black;">
 			
 			
 		<label>For New Users</label><br>
@@ -465,8 +468,7 @@ function displayChatMessage(id, name, text)
 		<br>		<br>
 		<label>Share</label><br>
 		
-		<input type="text" id="shId"	/>
-		<input type="text" readonly id="shNodeId"	/>
+		<input type="text" id="shId"	placeholder="User ID" />
 		<input type="button" value="share" id="shBt" onclick="sharing()"	/>
 		
 		<center>		<br>
