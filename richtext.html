@@ -35,6 +35,7 @@
 	.request{background-color:lightblue; cursor:pointer; float:left; padding:10px; font-size:20px; border: 1px solid black; } 
 	.spcrequest{background-color:lightblue; cursor:pointer; float:left; padding:10px; font-size:20px; border: 1px solid black; } 
 	
+	#displayID{ position:absolute; top:20px; right: 50px; width:150px; height:100px;	}
   </style>
 </head>
 
@@ -44,6 +45,7 @@
 	<p>Shared Document</p>
 	<p class="spcrequest" onclick="dumy()" >MY</p>
   </div>
+  <div id="displayID"></div>
   
    <script>
   
@@ -71,7 +73,7 @@
 						firepad.on('ready', function() {
 						  if (firepad.isHistoryEmpty()) {
 							firepad.setHtml(
-								'<span style="font-size: 24px;">Rich-text editing with <span style="color: red">Firepad!</span></span><br/>\n' +
+								'<span style="font-size: 24 px" >Document created by User ID: -' + du.id + '</span>' +
 								'<br/>' +
 								'<div style="font-size: 18px">' +
 								'Supports:<br/>' +
@@ -234,6 +236,8 @@ $(document).ready(function(){
 			// user authenticated with Firebase
 			passing(user);
 			console.log('User ID: ' + user.id + ', Provider: ' + user.provider + ', email: ' + user.email);
+			
+			$('<p>Your User ID is : <b>'+user.id+"</b></p>").appendTo($('#displayID'));
 			
 			runFirepad(user.id);
 			
