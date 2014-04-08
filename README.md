@@ -6,7 +6,8 @@ Collaborative text editor with file manager
 Steps to operate :
 
 This will guide you to run the collaborative text editor, which is previously hosted on github.
-1.	Go to this link.
+
+1.	Go to this rawgithub.com/raghunandangupta1992/CollaborativeTextEditor/master/richtext.html.
 2.	Create a user: -
 •	Under ‘For New User’ label, fill the 1st input box as ‘username (eg. raghu@gmail.com)’ and 2nd as ‘password’.
 •	Press Create.
@@ -23,6 +24,7 @@ This will guide you to run the collaborative text editor, which is previously ho
 9.	 Once he clicks on it, he can see your document and can edit it simultaneously.
 
 Dummy usernames and password: -
+
 1.	Username: a@a.com
 Password: a
 
